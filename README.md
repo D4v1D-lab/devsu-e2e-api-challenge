@@ -1,6 +1,6 @@
 # Devsu E2E + API Challenge
 
-[![CI](https://github.com/OWNER/devsu-e2e-api-challenge/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/devsu-e2e-api-challenge/actions/workflows/ci.yml)
+[![CI](https://github.com/D4v1D-lab/devsu-e2e-api-challenge/actions/workflows/ci.yml/badge.svg)](https://github.com/D4v1D-lab/devsu-e2e-api-challenge/actions/workflows/ci.yml)
 
 QA Automation / SDET take-home exercise:
 
