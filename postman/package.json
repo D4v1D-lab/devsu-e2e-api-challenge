@@ -1,10 +1,10 @@
 {
   "name": "devsu-api-tests",
   "version": "1.0.0",
-  "description": "Newman runner for Devsu API challenge collection",
+  "description": "Newman runner for the Devsu PetStore API challenge collection",
   "private": true,
   "scripts": {
-    "test": "newman run saucedemo-api.postman_collection.json --reporters cli,htmlextra --reporter-htmlextra-export ../reports/newman-report.html",
+    "test": "newman run petstore-api.postman_collection.json --reporters cli,htmlextra --reporter-htmlextra-export ../reports/newman-report.html",
     "test:ci": "npm test"
   },
   "devDependencies": {
