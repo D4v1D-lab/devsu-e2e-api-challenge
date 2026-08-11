@@ -1,0 +1,324 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567891",
+    "name": "Devsu API Challenge — PetStore",
+    "description": "Pruebas de servicios REST sobre la API PetStore (https://petstore.swagger.io/).\n\nCasos cubiertos:\n1. Crear un usuario\n2. Buscar el usuario creado\n3. Actualizar el nombre y el correo del usuario\n4. Buscar el usuario actualizado\n5. Eliminar el usuario\n6. Verificar la eliminación (HTTP 404)\n\nLa URL base usa la variable {{baseUrl}} (placeholder). Por defecto apunta a la demo pública: https://petstore.swagger.io/v2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://petstore.swagger.io/v2"
+    },
+    {
+      "key": "username",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "firstName",
+      "value": "Juan"
+    },
+    {
+      "key": "lastName",
+      "value": "Perez"
+    },
+    {
+      "key": "email",
+      "value": "juan@test.com"
+    },
+    {
+      "key": "updatedFirstName",
+      "value": "Carlos"
+    },
+    {
+      "key": "updatedLastName",
+      "value": "Gomez"
+    },
+    {
+      "key": "updatedEmail",
+      "value": "carlos.gomez@test.com"
+    },
+    {
+      "key": "password",
+      "value": "Pass123!"
+    },
+    {
+      "key": "phone",
+      "value": "0999999999"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Crear un usuario",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Generar un username único para no colisionar con otras ejecuciones",
+              "pm.collectionVariables.set('username', 'user_' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Status code es 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('La respuesta indica éxito (code 200)', function () {",
+              "    pm.expect(json.code).to.eql(200);",
+              "});",
+              "",
+              "pm.test('Se captura el id del usuario creado', function () {",
+              "    pm.expect(json.message).to.not.be.empty;",
+              "    pm.collectionVariables.set('userId', json.message);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user"
+          ]
+        },
+        "description": "Entrada: username único (generado en pre-request), firstName, lastName, email, password, phone. Salida: code 200 y message con el id del usuario creado.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 0,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "2. Buscar el usuario creado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Status code es 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('El usuario devuelto es el creado', function () {",
+              "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
+              "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('firstName'));",
+              "    pm.expect(json.email).to.eql(pm.collectionVariables.get('email'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{username}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{username}}"
+          ]
+        },
+        "description": "Entrada: username creado en el caso 1. Salida: objeto del usuario. Validación: username, nombre y correo coinciden con los de creación."
+      }
+    },
+    {
+      "name": "3. Actualizar el nombre y el correo del usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Status code es 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('La actualización indica éxito (code 200)', function () {",
+              "    pm.expect(json.code).to.eql(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{username}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{username}}"
+          ]
+        },
+        "description": "Entrada: el mismo id del usuario creado (crítico: si se envía id 0, PetStore crea un registro nuevo en lugar de actualizar), firstName/lastName/email nuevos. Salida: code 200.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{userId}},\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{updatedFirstName}}\",\n  \"lastName\": \"{{updatedLastName}}\",\n  \"email\": \"{{updatedEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "4. Buscar el usuario actualizado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Status code es 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('El nombre se actualizó correctamente', function () {",
+              "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('updatedFirstName'));",
+              "    pm.expect(json.lastName).to.eql(pm.collectionVariables.get('updatedLastName'));",
+              "});",
+              "",
+              "pm.test('El correo se actualizó correctamente', function () {",
+              "    pm.expect(json.email).to.eql(pm.collectionVariables.get('updatedEmail'));",
+              "});",
+              "",
+              "pm.test('El username se mantiene', function () {",
+              "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
+              "});",
+              "",
+              "pm.test('El id se mantiene (comparado con el texto crudo por precisión de enteros largos)', function () {",
+              "    const rawId = (pm.response.text().match(/\"id\":\\s*(\\d+)/) || [])[1];",
+              "    pm.expect(rawId).to.eql(pm.collectionVariables.get('userId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{username}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{username}}"
+          ]
+        },
+        "description": "Entrada: username del usuario actualizado. Salida: objeto del usuario. Validación: firstName, lastName y email son los nuevos."
+      }
+    },
+    {
+      "name": "5. Eliminar el usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const json = pm.response.json();",
+              "",
+              "pm.test('Status code es 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('La eliminación indica éxito (code 200)', function () {",
+              "    pm.expect(json.code).to.eql(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{username}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{username}}"
+          ]
+        },
+        "description": "Entrada: username del usuario a eliminar. Salida: code 200."
+      }
+    },
+    {
+      "name": "6. Verificar la eliminación (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code es 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('El mensaje indica que el usuario no existe', function () {",
+              "    pm.expect(pm.response.text()).to.include('User not found');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/{{username}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "{{username}}"
+          ]
+        },
+        "description": "Entrada: username del usuario eliminado. Salida esperada: HTTP 404 con 'User not found'. Confirma que la eliminación fue efectiva."
+      }
+    }
+  ]
+}
