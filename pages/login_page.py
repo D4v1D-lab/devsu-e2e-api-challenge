@@ -1,4 +1,5 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from pages.base_page import BasePage
 
@@ -12,10 +13,17 @@ class LoginPage(BasePage):
     def open_login(self, base_url: str) -> None:
         self.open(base_url)
 
-    def login(self, username: str, password: str) -> None:
+    def login(
+        self,
+        username: str,
+        password: str,
+        expected=None,
+    ) -> None:
         self.type_text(self.USERNAME_INPUT, username)
         self.type_text(self.PASSWORD_INPUT, password)
-        self.click(self.LOGIN_BUTTON)
+        if expected is None:
+            expected = EC.url_contains("inventory")
+        self.click(self.LOGIN_BUTTON, expected=expected)
 
     def get_error_message(self) -> str:
         return self.get_text(self.ERROR_MESSAGE)

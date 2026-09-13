@@ -20,10 +20,12 @@ class ProductsPage(BasePage):
     def add_product_to_cart(self, product_id: str) -> None:
         """Add a product by its data-test / id suffix, e.g. 'sauce-labs-backpack'."""
         locator = (By.ID, f"add-to-cart-{product_id}")
-        self.click(locator)
+        # Al agregar, el botón desaparece y es reemplazado por "Remove": verificar
+        # esa desaparición evita doble clic si el primero sí funcionó.
+        self.click(locator, expected=EC.invisibility_of_element_located(locator))
 
     def open_cart(self) -> None:
-        self.click(self.CART_LINK)
+        self.click(self.CART_LINK, expected=EC.url_contains("cart.html"))
 
     def get_cart_count(self) -> int:
         badges = self.driver.find_elements(*self.CART_BADGE)

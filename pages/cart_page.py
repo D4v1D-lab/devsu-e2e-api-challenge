@@ -29,4 +29,4 @@ class CartPage(BasePage):
         ]
 
     def proceed_to_checkout(self) -> None:
-        self.click(self.CHECKOUT_BUTTON)
+        self.click(self.CHECKOUT_BUTTON, expected=EC.url_contains("checkout-step-one"))

@@ -1,5 +1,7 @@
 import os
 
+from selenium.webdriver.support import expected_conditions as EC
+
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
 
@@ -7,7 +9,11 @@ from pages.products_page import ProductsPage
 def test_login_with_invalid_credentials_shows_error(driver, base_url):
     login_page = LoginPage(driver)
     login_page.open_login(base_url)
-    login_page.login("invalid_user", "wrong_password")
+    login_page.login(
+        "invalid_user",
+        "wrong_password",
+        expected=EC.visibility_of_element_located(login_page.ERROR_MESSAGE),
+    )
 
     assert login_page.is_error_displayed()
     error = login_page.get_error_message().lower()

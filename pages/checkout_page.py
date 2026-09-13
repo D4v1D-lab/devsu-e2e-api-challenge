@@ -19,12 +19,12 @@ class CheckoutPage(BasePage):
         self.type_text(self.FIRST_NAME_INPUT, first_name)
         self.type_text(self.LAST_NAME_INPUT, last_name)
         self.type_text(self.POSTAL_CODE_INPUT, postal_code)
-        self.click(self.CONTINUE_BUTTON)
+        self.click(self.CONTINUE_BUTTON, expected=EC.url_contains("checkout-step-two"))
         self.wait.until(EC.visibility_of_element_located(self.SUMMARY_CONTAINER))
 
     def finish_order(self) -> None:
         self.wait.until(EC.element_to_be_clickable(self.FINISH_BUTTON))
-        self.click(self.FINISH_BUTTON)
+        self.click(self.FINISH_BUTTON, expected=EC.url_contains("checkout-complete"))
 
     def get_summary_item_names(self) -> list[str]:
         return [
