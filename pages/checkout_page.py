@@ -25,3 +25,15 @@ class CheckoutPage(BasePage):
     def finish_order(self) -> None:
         self.wait.until(EC.element_to_be_clickable(self.FINISH_BUTTON))
         self.click(self.FINISH_BUTTON)
+
+    def get_summary_item_names(self) -> list[str]:
+        return [
+            el.text
+            for el in self.driver.find_elements(
+                By.CSS_SELECTOR, ".cart_item .inventory_item_name"
+            )
+        ]
+
+    def get_summary_item_total(self) -> float:
+        label = self.find((By.CSS_SELECTOR, ".summary_subtotal_label")).text
+        return float(label.split("$")[1])

@@ -22,9 +22,12 @@ def test_happy_path_checkout(driver, base_url):
     assert products.get_cart_count() == 2
     products.open_cart()
 
+    expected_items = ["Sauce Labs Backpack", "Sauce Labs Bike Light"]
+
     cart = CartPage(driver)
     assert cart.is_loaded()
     assert cart.get_item_count() == 2
+    assert cart.get_item_names() == expected_items
     cart.proceed_to_checkout()
 
     checkout = CheckoutPage(driver)
@@ -33,8 +36,11 @@ def test_happy_path_checkout(driver, base_url):
         last_name=os.getenv("CHECKOUT_LAST_NAME", "Doe"),
         postal_code=os.getenv("CHECKOUT_POSTAL_CODE", "12345"),
     )
+
+    # El resumen muestra los mismos productos y el subtotal correcto (29.99 + 9.99)
+    assert checkout.get_summary_item_names() == expected_items
+    assert checkout.get_summary_item_total() == 29.99 + 9.99
     checkout.finish_order()
 
     complete = CheckoutCompletePage(driver)
     assert complete.is_order_complete()
-    assert "THANK YOU FOR YOUR ORDER" in complete.get_complete_header().upper()

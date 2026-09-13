@@ -119,14 +119,16 @@ Abre ese archivo en el navegador para ver el reporte.
 
 ### Requests de la colección
 
-Cubre el ciclo de vida completo de un usuario en la API de PetStore:
+La colección tiene dos folders:
 
-1. **POST /user** — Crear un usuario (username único generado en pre-request)
-2. **GET /user/{username}** — Buscar el usuario creado
-3. **PUT /user/{username}** — Actualizar el nombre y el correo del usuario
-4. **GET /user/{username}** — Buscar el usuario actualizado (valida los cambios)
-5. **DELETE /user/{username}** — Eliminar el usuario
-6. **GET /user/{username}** — Verificar la eliminación (espera HTTP 404)
+1. **`Ciclo de vida: crear, actualizar y eliminar un usuario`** — cubre el ciclo de vida completo de un usuario en la API de PetStore:
+   1. **POST /user** — Crear un usuario (username único generado en pre-request)
+   2. **GET /user/{username}** — Buscar el usuario creado
+   3. **PUT /user/{username}** — Actualizar el nombre y el correo del usuario
+   4. **GET /user/{username}** — Buscar el usuario actualizado (valida los cambios)
+   5. **DELETE /user/{username}** — Eliminar el usuario
+   6. **GET /user/{username}** — Verificar la eliminación (espera HTTP 404)
+2. **`Defecto documentado: PUT /user con id: 0`** — reproduce un defecto real de la API (ver sección [Defectos encontrados](#defecto-encontrado-put-user-con-id-0-no-actualiza-crea-un-registro-nuevo)). Termina en rojo a propósito.
 
 Todas las URLs usan la variable de colección `{{baseUrl}}` (sin hosts hardcodeados en los requests).
 
@@ -141,11 +143,37 @@ Todas las URLs usan la variable de colección `{{baseUrl}}` (sin hosts hardcodea
 | `updatedFirstName`, `updatedLastName`, `updatedEmail` | Datos nuevos usados en la actualización |
 | `password`, `phone` | Credenciales y teléfono del usuario |
 
-### Hallazgos de la ejecución
+### Defecto encontrado: `PUT /user` con `id: 0` no actualiza, crea un registro nuevo
 
-- **El PUT debe reutilizar el `id` del usuario creado.** Si el body del PUT envía `id: 0`, PetStore crea un registro nuevo en lugar de actualizar el existente, y la búsqueda posterior no refleja los cambios. Por eso el caso 1 captura el `userId` de la respuesta y el caso 3 lo reutiliza.
-- **Los ids de PetStore son enteros largos (> 2^53).** JavaScript los redondea al parsear JSON, por lo que la validación del id en el caso 4 se hace sobre el texto crudo de la respuesta, no sobre el JSON parseado.
-- **La demo pública de PetStore funciona de forma determinista** con este flujo (verificado con Newman, 16/16 aserciones).
+**Comportamiento esperado:** `PUT /user/{username}` actualiza el recurso identificado por la URL; el `GET` posterior a esa misma URL debe reflejar los cambios.
+
+**Comportamiento real (reproducido con curl y Newman):**
+
+```
+POST /user  {"id":0, "username":"qa_check_…", "firstName":"Juan"}
+  → 200 {"message":"9223372036854767906"}
+
+PUT /user/qa_check_…  {"id":0, "firstName":"Carlos"}
+  → 200 {"message":"9223372036854767907"}      ← id NUEVO, y responde "éxito"
+
+GET /user/qa_check_…  (tres veces)
+  → {"id":9223372036854767906, "firstName":"Juan"}   ← nunca se actualizó
+```
+
+**Causa:** la URL identifica al usuario; un body con `id: 0` hace que PetStore cree un registro **nuevo** y responda `200`, sin tocar el recurso de la URL. La API responde "éxito" a una operación que no hizo lo que pide su contrato.
+
+**Manejo en la entrega:** el folder `Defecto documentado: PUT /user con id: 0` reproduce el defecto de forma autocontenida (crea su propio usuario de control) y deja la verificación **en rojo a propósito** mientras el defecto exista:
+
+```bash
+cd postman
+npm run test:defect    # esperado: 3 verdes + 1 rojo (la verificación C)
+```
+
+El flujo principal (`npm test`) usa el `userId` real en el PUT — ese es el path correcto — y queda en verde con 16/16 aserciones.
+
+### Hallazgo (positivo): los ids de PetStore superan 2^53
+
+JavaScript representa enteros exactos solo hasta `2^53 − 1` (`9007199254740991`). PetStore devuelve ids como `9223372036854767906`, así que `pm.response.json().id` llegaría **redondeado**. Por eso el id se captura desde `message` (string) y se compara contra el texto crudo de la respuesta. La demo pública de PetStore funciona de forma determinista con este flujo (verificado con Newman, 16/16 aserciones).
 
 Para apuntar a otro entorno:
 
@@ -187,11 +215,22 @@ Crea `devsu-exercise.zip`, excluyendo `.git`, `.venv`, `__pycache__`, `node_modu
 | Suite | Escenario |
 |-------|-----------|
 | E2E | Login con credenciales válidas → página de productos |
-| E2E | Login con credenciales inválidas → mensaje de error |
+| E2E | Login con credenciales inválidas → mensaje de error exacto |
 | E2E | Agregar 2 productos → carrito → checkout → finish → "THANK YOU FOR YOUR ORDER" |
+| E2E | El carrito y el resumen muestran los productos correctos (Backpack + Bike Light) |
+| E2E | El subtotal del resumen es la suma de los precios (29.99 + 9.99) |
 | API | Crear un usuario |
 | API | Buscar el usuario creado |
 | API | Actualizar el nombre y el correo del usuario |
 | API | Buscar el usuario actualizado |
 | API | Eliminar el usuario |
 | API | Verificar la eliminación (404) |
+| API | PUT con `id: 0` — reproduce el defecto documentado (en rojo a propósito) |
+
+### Fuera de alcance
+
+- **E2E:** un solo navegador (Chrome headless), un solo usuario (`standard_user`) y sin cubrir a los otros usuarios de Sauce Demo (`locked_out`, `problem`, `performance`). No se prueban ordenamientos, detalle de producto ni pagos reales.
+- **API:** solo el recurso `/user` de PetStore; no se cubren pet, store ni la validación del contrato OpenAPI.
+- No se ejecutaron pruebas de carga, seguridad ni compatibilidad entre navegadores.
+
+Nadie espera que se pruebe todo; esta sección deja explícito qué no se probó.

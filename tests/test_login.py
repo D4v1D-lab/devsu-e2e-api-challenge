@@ -11,7 +11,7 @@ def test_login_with_invalid_credentials_shows_error(driver, base_url):
 
     assert login_page.is_error_displayed()
     error = login_page.get_error_message().lower()
-    assert "username and password do not match" in error or "epic sadface" in error
+    assert "username and password do not match any user in this service" in error
 
 
 def test_login_with_valid_credentials(driver, base_url):

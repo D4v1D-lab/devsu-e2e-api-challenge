@@ -4,7 +4,8 @@
   "description": "Newman runner for the Devsu PetStore API challenge collection",
   "private": true,
   "scripts": {
-    "test": "newman run petstore-api.postman_collection.json --reporters cli,htmlextra --reporter-htmlextra-export ../reports/newman-report.html",
+    "test": "newman run petstore-api.postman_collection.json --folder \"Ciclo de vida: crear, actualizar y eliminar un usuario\" --reporters cli,htmlextra --reporter-htmlextra-export ../reports/newman-report.html",
+    "test:defect": "newman run petstore-api.postman_collection.json --folder \"Defecto documentado: PUT /user con id: 0\" --reporters cli,htmlextra --reporter-htmlextra-export ../reports/newman-defect-report.html",
     "test:ci": "npm test"
   },
   "devDependencies": {

@@ -20,5 +20,13 @@ class CartPage(BasePage):
     def get_item_count(self) -> int:
         return len(self.driver.find_elements(*self.CART_ITEMS))
 
+    def get_item_names(self) -> list[str]:
+        return [
+            el.text
+            for el in self.driver.find_elements(
+                By.CSS_SELECTOR, ".cart_item .inventory_item_name"
+            )
+        ]
+
     def proceed_to_checkout(self) -> None:
         self.click(self.CHECKOUT_BUTTON)

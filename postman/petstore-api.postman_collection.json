@@ -53,272 +53,448 @@
   ],
   "item": [
     {
-      "name": "1. Crear un usuario",
-      "event": [
+      "name": "Ciclo de vida: crear, actualizar y eliminar un usuario",
+      "item": [
         {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "// Generar un username único para no colisionar con otras ejecuciones",
-              "pm.collectionVariables.set('username', 'user_' + Date.now());"
-            ]
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "pm.test('Status code es 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('La respuesta indica éxito (code 200)', function () {",
-              "    pm.expect(json.code).to.eql(200);",
-              "});",
-              "",
-              "pm.test('Se captura el id del usuario creado', function () {",
-              "    pm.expect(json.message).to.not.be.empty;",
-              "    pm.collectionVariables.set('userId', json.message);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/user",
-          "host": [
-            "{{baseUrl}}"
+          "name": "1. Crear un usuario",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Generar un username único para no colisionar con otras ejecuciones",
+                  "pm.collectionVariables.set('username', 'user_' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La respuesta indica éxito (code 200)', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('Se captura el id del usuario creado', function () {",
+                  "    pm.expect(json.message).to.not.be.empty;",
+                  "    pm.collectionVariables.set('userId', json.message);",
+                  "});"
+                ]
+              }
+            }
           ],
-          "path": [
-            "user"
-          ]
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "description": "Entrada: username único (generado en pre-request), firstName, lastName, email, password, phone. Salida: code 200 y message con el id del usuario creado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
+            }
+          }
         },
-        "description": "Entrada: username único (generado en pre-request), firstName, lastName, email, password, phone. Salida: code 200 y message con el id del usuario creado.",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"id\": 0,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
+        {
+          "name": "2. Buscar el usuario creado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('El usuario devuelto es el creado', function () {",
+                  "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
+                  "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('firstName'));",
+                  "    pm.expect(json.email).to.eql(pm.collectionVariables.get('email'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{username}}"
+              ]
+            },
+            "description": "Entrada: username creado en el caso 1. Salida: objeto del usuario. Validación: username, nombre y correo coinciden con los de creación."
+          }
+        },
+        {
+          "name": "3. Actualizar el nombre y el correo del usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La actualización indica éxito (code 200)', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{username}}"
+              ]
+            },
+            "description": "Entrada: el mismo id del usuario creado (crítico: si se envía id 0, PetStore crea un registro nuevo en lugar de actualizar), firstName/lastName/email nuevos. Salida: code 200.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{userId}},\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{updatedFirstName}}\",\n  \"lastName\": \"{{updatedLastName}}\",\n  \"email\": \"{{updatedEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Buscar el usuario actualizado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('El nombre se actualizó correctamente', function () {",
+                  "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('updatedFirstName'));",
+                  "    pm.expect(json.lastName).to.eql(pm.collectionVariables.get('updatedLastName'));",
+                  "});",
+                  "",
+                  "pm.test('El correo se actualizó correctamente', function () {",
+                  "    pm.expect(json.email).to.eql(pm.collectionVariables.get('updatedEmail'));",
+                  "});",
+                  "",
+                  "pm.test('El username se mantiene', function () {",
+                  "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
+                  "});",
+                  "",
+                  "pm.test('El id se mantiene (comparado con el texto crudo por precisión de enteros largos)', function () {",
+                  "    const rawId = (pm.response.text().match(/\"id\":\\s*(\\d+)/) || [])[1];",
+                  "    pm.expect(rawId).to.eql(pm.collectionVariables.get('userId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{username}}"
+              ]
+            },
+            "description": "Entrada: username del usuario actualizado. Salida: objeto del usuario. Validación: firstName, lastName y email son los nuevos."
+          }
+        },
+        {
+          "name": "5. Eliminar el usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La eliminación indica éxito (code 200)', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{username}}"
+              ]
+            },
+            "description": "Entrada: username del usuario a eliminar. Salida: code 200."
+          }
+        },
+        {
+          "name": "6. Verificar la eliminación (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('El mensaje indica que el usuario no existe', function () {",
+                  "    pm.expect(pm.response.text()).to.include('User not found');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{username}}"
+              ]
+            },
+            "description": "Entrada: username del usuario eliminado. Salida esperada: HTTP 404 con 'User not found'. Confirma que la eliminación fue efectiva."
+          }
         }
-      }
+      ]
     },
     {
-      "name": "2. Buscar el usuario creado",
-      "event": [
+      "name": "Defecto documentado: PUT /user con id: 0",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "pm.test('Status code es 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('El usuario devuelto es el creado', function () {",
-              "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
-              "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('firstName'));",
-              "    pm.expect(json.email).to.eql(pm.collectionVariables.get('email'));",
-              "});"
+          "name": "A. Crear usuario de control (id real)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"username\": \"{{defectUsername}}\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"email\": \"juan@test.com\",\n  \"password\": \"Pass123!\",\n  \"phone\": \"0999999999\",\n  \"userStatus\": 1\n}"
+            },
+            "description": "Crea un usuario con id real (asignado por el servidor). Sirve de referencia: el GET posterior debe devolver sus datos.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ]
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/user/{{username}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "user",
-            "{{username}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Username único para el usuario de control del defecto",
+                  "pm.collectionVariables.set('defectUsername', 'defect_' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test('Status code es 200 (usuario de control creado)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Se captura el id real del usuario de control', function () {",
+                  "    pm.expect(json.message).to.not.be.empty;",
+                  "    pm.collectionVariables.set('defectUserId', json.message);",
+                  "});"
+                ]
+              }
+            }
           ]
         },
-        "description": "Entrada: username creado en el caso 1. Salida: objeto del usuario. Validación: username, nombre y correo coinciden con los de creación."
-      }
-    },
-    {
-      "name": "3. Actualizar el nombre y el correo del usuario",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "pm.test('Status code es 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('La actualización indica éxito (code 200)', function () {",
-              "    pm.expect(json.code).to.eql(200);",
-              "});"
+          "name": "B. PUT con id: 0 — la API responde éxito (reproduce el defecto)",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/user/{{defectUsername}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{defectUsername}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"username\": \"{{defectUsername}}\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Gomez\",\n  \"email\": \"carlos.gomez@test.com\",\n  \"password\": \"Pass123!\",\n  \"phone\": \"0999999999\",\n  \"userStatus\": 1\n}"
+            },
+            "description": "PUT /user/{username} con id: 0. La URL identifica al usuario, pero PetStore crea un registro NUEVO (devuelve un id distinto) y responde 200. El recurso de la URL no cambia.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ]
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/user/{{username}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "user",
-            "{{username}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "// Defecto: la API responde 200 'éxito' aunque no actualiza el recurso de la URL.",
+                  "pm.test('Status code es 200 (el PUT responde éxito — aquí miente la API)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La respuesta indica éxito (code 200)', function () {",
+                  "    pm.expect(json.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
           ]
         },
-        "description": "Entrada: el mismo id del usuario creado (crítico: si se envía id 0, PetStore crea un registro nuevo en lugar de actualizar), firstName/lastName/email nuevos. Salida: code 200.",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"id\": {{userId}},\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{updatedFirstName}}\",\n  \"lastName\": \"{{updatedLastName}}\",\n  \"email\": \"{{updatedEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"{{phone}}\",\n  \"userStatus\": 1\n}"
-        }
-      }
-    },
-    {
-      "name": "4. Buscar el usuario actualizado",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "pm.test('Status code es 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('El nombre se actualizó correctamente', function () {",
-              "    pm.expect(json.firstName).to.eql(pm.collectionVariables.get('updatedFirstName'));",
-              "    pm.expect(json.lastName).to.eql(pm.collectionVariables.get('updatedLastName'));",
-              "});",
-              "",
-              "pm.test('El correo se actualizó correctamente', function () {",
-              "    pm.expect(json.email).to.eql(pm.collectionVariables.get('updatedEmail'));",
-              "});",
-              "",
-              "pm.test('El username se mantiene', function () {",
-              "    pm.expect(json.username).to.eql(pm.collectionVariables.get('username'));",
-              "});",
-              "",
-              "pm.test('El id se mantiene (comparado con el texto crudo por precisión de enteros largos)', function () {",
-              "    const rawId = (pm.response.text().match(/\"id\":\\s*(\\d+)/) || [])[1];",
-              "    pm.expect(rawId).to.eql(pm.collectionVariables.get('userId'));",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/user/{{username}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "user",
-            "{{username}}"
+          "name": "C. Verificación: el recurso de la URL refleja el cambio (fallo esperado)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/user/{{defectUsername}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{defectUsername}}"
+              ]
+            },
+            "description": "Verificación: el GET al usuario identificado por la URL debería devolver el nombre nuevo. Hoy devuelve 'Juan' (los datos originales): el PUT con id 0 creó un registro nuevo y el recurso de la URL quedó intacto."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "",
+                  "// Test de regresión del defecto: FALLA a propósito mientras el defecto exista.",
+                  "pm.test('El recurso de la URL refleja el cambio (PUT con id: 0 no actualiza) — fallo esperado', function () {",
+                  "    pm.expect(json.firstName).to.eql('Carlos');",
+                  "});"
+                ]
+              }
+            }
           ]
         },
-        "description": "Entrada: username del usuario actualizado. Salida: objeto del usuario. Validación: firstName, lastName y email son los nuevos."
-      }
-    },
-    {
-      "name": "5. Eliminar el usuario",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const json = pm.response.json();",
-              "",
-              "pm.test('Status code es 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('La eliminación indica éxito (code 200)', function () {",
-              "    pm.expect(json.code).to.eql(200);",
-              "});"
-            ]
-          }
+          "name": "D. Limpieza: eliminar el usuario de control",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/user/{{defectUsername}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{defectUsername}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Limpieza: el usuario de control se elimina (200)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/user/{{username}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "user",
-            "{{username}}"
-          ]
-        },
-        "description": "Entrada: username del usuario a eliminar. Salida: code 200."
-      }
-    },
-    {
-      "name": "6. Verificar la eliminación (404)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Status code es 404', function () {",
-              "    pm.response.to.have.status(404);",
-              "});",
-              "",
-              "pm.test('El mensaje indica que el usuario no existe', function () {",
-              "    pm.expect(pm.response.text()).to.include('User not found');",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/user/{{username}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "user",
-            "{{username}}"
-          ]
-        },
-        "description": "Entrada: username del usuario eliminado. Salida esperada: HTTP 404 con 'User not found'. Confirma que la eliminación fue efectiva."
-      }
+      "description": "Reproduce un defecto real de PetStore: el PUT /user/{username} identifica al usuario por la URL, pero si el body lleva id: 0 crea un registro NUEVO y responde 200. El GET posterior a la misma URL sigue devolviendo los datos originales. Ejecución: npm run test:defect (termina en rojo a propósito: la verificación C falla)."
     }
   ]
 }

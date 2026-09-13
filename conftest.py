@@ -4,8 +4,6 @@ from pathlib import Path
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 SCREENSHOTS_DIR = Path(__file__).resolve().parent / "reports" / "screenshots"
 
@@ -26,8 +24,7 @@ def driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
 
-    service = Service(ChromeDriverManager().install())
-    drv = webdriver.Chrome(service=service, options=options)
+    drv = webdriver.Chrome(options=options)
     drv.implicitly_wait(0)
     yield drv
     drv.quit()

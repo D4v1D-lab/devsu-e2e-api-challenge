@@ -26,6 +26,7 @@ class ProductsPage(BasePage):
         self.click(self.CART_LINK)
 
     def get_cart_count(self) -> int:
-        if not self.is_displayed(self.CART_BADGE):
+        badges = self.driver.find_elements(*self.CART_BADGE)
+        if not badges:
             return 0
-        return int(self.get_text(self.CART_BADGE))
+        return int(badges[0].text)
