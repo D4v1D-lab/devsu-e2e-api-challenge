@@ -44,5 +44,10 @@ class CheckoutPage(BasePage):
         self.wait.until(EC.visibility_of_element_located(self.INFO_CONTAINER))
         self.type_text(self.FIRST_NAME_INPUT, first_name)
         self.type_text(self.LAST_NAME_INPUT, last_name)
-        self.click(self.CONTINUE_BUTTON)
-        return self.wait.until(EC.visibility_of_element_located(self.ERROR_MESSAGE)).text
+        # El clic se verifica contra el mensaje de error: si headless pierde el
+        # evento, click() reintenta y usa el clic programatico.
+        self.click(
+            self.CONTINUE_BUTTON,
+            expected=EC.visibility_of_element_located(self.ERROR_MESSAGE),
+        )
+        return self.find(self.ERROR_MESSAGE).text
