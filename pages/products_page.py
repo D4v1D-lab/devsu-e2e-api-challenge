@@ -32,3 +32,13 @@ class ProductsPage(BasePage):
         if not badges:
             return 0
         return int(badges[0].text)
+
+    def wait_for_cart_count(self, expected: int) -> None:
+        """Espera a que el contador del carrito muestre el numero esperado.
+
+        Evita leer el badge antes de que el sitio lo actualice, que es la causa
+        mas comun de fallos intermitentes en esta pantalla.
+        """
+        self.wait.until(
+            lambda d: d.find_element(*self.CART_BADGE).text == str(expected)
+        )
