@@ -495,6 +495,46 @@
         }
       ],
       "description": "Reproduce un defecto real de PetStore: el PUT /user/{username} identifica al usuario por la URL, pero si el body lleva id: 0 crea un registro NUEVO y responde 200. El GET posterior a la misma URL sigue devolviendo los datos originales. Ejecución: npm run test:defect (termina en rojo a propósito: la verificación C falla)."
+    },
+    {
+      "name": "Casos negativos",
+      "item": [
+        {
+          "name": "Usuario inexistente devuelve 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test('No devuelve datos del usuario', function () {",
+                  "    pm.expect(pm.response.text()).to.be.oneOf(['User not found', '{}', '']);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/no_existe_{{timestamp}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "no_existe_{{timestamp}}"
+              ]
+            },
+            "description": "Entrada: username que no existe. Salida esperada: 404 y sin datos del usuario."
+          }
+        }
+      ]
     }
   ]
 }
