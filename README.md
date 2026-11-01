@@ -234,3 +234,11 @@ Crea `devsu-exercise.zip`, excluyendo `.git`, `.venv`, `__pycache__`, `node_modu
 - No se ejecutaron pruebas de carga, seguridad ni compatibilidad entre navegadores.
 
 Nadie espera que se pruebe todo; esta sección deja explícito qué no se probó.
+
+---
+
+## Documentos de la entrega
+
+- [`readme.txt`](readme.txt): instrucciones paso a paso de ejecucion.
+- [`conclusiones.txt`](conclusiones.txt): hallazgos y conclusiones.
+- [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md): por que el proyecto esta armado asi.
