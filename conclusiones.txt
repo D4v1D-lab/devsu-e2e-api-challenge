@@ -1,0 +1,33 @@
+Conclusiones del ejercicio
+==========================
+
+E2E (Sauce Demo)
+----------------
+1. El flujo de compra completo funciona: login, dos productos, carrito, checkout y confirmacion
+   "THANK YOU FOR YOUR ORDER".
+2. La confirmacion depende de completar el codigo postal; si el campo queda vacio, el formulario
+   muestra error y no avanza. Es una validacion del sitio, no un defecto.
+3. Los precios del resumen coinciden con la suma de los productos del carrito (29.99 + 9.99 = 39.98).
+4. Las pruebas se estabilizaron con esperas explicitas; las esperas fijas provocaban fallos
+   intermitentes en modo headless.
+
+API (PetStore)
+--------------
+5. El ciclo create, get, update, get y delete funciona con el id real en el PUT.
+6. Defecto documentado: PUT /user con "id": 0 en el cuerpo responde 200 y crea un registro nuevo
+   en lugar de actualizar el recurso de la URL. La API informa exito sin cumplir su contrato.
+   La verificacion queda en rojo a proposito mientras el defecto exista.
+7. Los ids de PetStore superan 2^53, por lo que JavaScript los redondearia. El id se captura desde
+   el campo message (texto) y se compara como texto.
+
+Aprendizajes
+------------
+8. Un 200 no prueba que la operacion se haya hecho; hay que verificar el estado del recurso.
+9. Las aserciones sobre el mensaje de respuesta son mas fragiles que las aserciones sobre el
+   recurso; se usan solo cuando la API no expone otra evidencia.
+
+Fuera de alcance
+----------------
+- Un solo navegador (Chrome headless) y un solo usuario de Sauce Demo.
+- Solo el recurso /user de PetStore.
+- No se ejecutaron pruebas de carga, seguridad ni de compatibilidad entre navegadores.
