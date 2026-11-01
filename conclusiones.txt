@@ -21,16 +21,23 @@ API (PetStore)
    el campo message (texto) y se compara como texto.
 
 Estabilidad
-----------
-10. En una ejecucion de CI la suite E2E fallo y en la siguiente, con el mismo codigo, paso. Se
+-----------
+8. En una ejecucion de CI la suite E2E fallo y en la siguiente, con el mismo codigo, paso. Se
     agrego una espera explicita sobre el contador del carrito antes de leerlo, que es el punto
     donde el sitio actualiza el badge de forma asincrona.
+9. En el runner de CI el clic de "Continuar" con el codigo postal vacio se perdia: el formulario
+    nunca llegaba a mostrar el error y la prueba fallaba solo en CI, nunca en local. Se corrigio
+    haciendo que el clic verifique su efecto (la aparicion del mensaje de error) y reintente usando
+    clic programatico si el evento no se registro. La prueba quedo en verde en local y en CI.
 
 Aprendizajes
 ------------
-8. Un 200 no prueba que la operacion se haya hecho; hay que verificar el estado del recurso.
-9. Las aserciones sobre el mensaje de respuesta son mas fragiles que las aserciones sobre el
+10. Un 200 no prueba que la operacion se haya hecho; hay que verificar el estado del recurso.
+11. Las aserciones sobre el mensaje de respuesta son mas fragiles que las aserciones sobre el
    recurso; se usan solo cuando la API no expone otra evidencia.
+12. Que una prueba pase en local y falle en CI no significa que el entorno sea el culpable: la
+    diferencia es la velocidad y el modo headless. La solucion es que cada accion verifique su
+    efecto en la interfaz, no aumentar el tiempo de espera.
 
 Fuera de alcance
 ----------------
