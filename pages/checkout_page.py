@@ -13,6 +13,7 @@ class CheckoutPage(BasePage):
     TITLE = (By.CSS_SELECTOR, ".title")
     INFO_CONTAINER = (By.ID, "checkout_info_container")
     SUMMARY_CONTAINER = (By.ID, "checkout_summary_container")
+    ERROR_MESSAGE = (By.CSS_SELECTOR, "h3[data-test='error']")
 
     def fill_information(self, first_name: str, last_name: str, postal_code: str) -> None:
         self.wait.until(EC.visibility_of_element_located(self.INFO_CONTAINER))
@@ -37,3 +38,11 @@ class CheckoutPage(BasePage):
     def get_summary_item_total(self) -> float:
         label = self.find((By.CSS_SELECTOR, ".summary_subtotal_label")).text
         return float(label.split("$")[1])
+
+    def submit_without_postal_code(self, first_name: str, last_name: str) -> str:
+        """Completa el formulario sin codigo postal y devuelve el mensaje de error."""
+        self.wait.until(EC.visibility_of_element_located(self.INFO_CONTAINER))
+        self.type_text(self.FIRST_NAME_INPUT, first_name)
+        self.type_text(self.LAST_NAME_INPUT, last_name)
+        self.click(self.CONTINUE_BUTTON)
+        return self.wait.until(EC.visibility_of_element_located(self.ERROR_MESSAGE)).text
