@@ -19,6 +19,7 @@ def test_happy_path_checkout(driver, base_url):
     assert products.is_loaded()
     products.add_product_to_cart("sauce-labs-backpack")
     products.add_product_to_cart("sauce-labs-bike-light")
+    products.wait_for_cart_count(2)
     assert products.get_cart_count() == 2
     products.open_cart()
 

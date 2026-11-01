@@ -20,6 +20,12 @@ API (PetStore)
 7. Los ids de PetStore superan 2^53, por lo que JavaScript los redondearia. El id se captura desde
    el campo message (texto) y se compara como texto.
 
+Estabilidad
+----------
+10. En una ejecucion de CI la suite E2E fallo y en la siguiente, con el mismo codigo, paso. Se
+    agrego una espera explicita sobre el contador del carrito antes de leerlo, que es el punto
+    donde el sitio actualiza el badge de forma asincrona.
+
 Aprendizajes
 ------------
 8. Un 200 no prueba que la operacion se haya hecho; hay que verificar el estado del recurso.
